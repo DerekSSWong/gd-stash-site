@@ -23,6 +23,12 @@
     --ink:#241F19; --dim:#6E6455; --rule:#C6BFAC; --rule-2:#B3AA93;
     --legendary:#5A039A; --epic:#39ABCF; --focus:#9A5B00;
     --mark:#F6DFA4; --mark-edge:#C9A227;
+    /* ⚠️ DEFINED IN ALL THREE BLOCKS, like every other token here. It was used
+       by the craftable tag and the blueprint bars and defined nowhere, which
+       made `background:var(--accent)` an invalid declaration -- the bars painted
+       nothing and looked like a rendering bug, while the tag's `color` and
+       `border` fell back to something plausible and said nothing. */
+    --accent:#9A5B00;
     --cA:#80FFD5;--cB:#39ABCF;--cC:#00FFFF;--cD:var(--ink);--cE:#49392A;--cF:#FF69B5;--cG:#10EB5D;--cH:#C7BAA9;--cI:#5A039A;--cK:#F1E78C;--cL:#92CC00;--cM:#800000;--cO:#F3A44D;--cP:#BD94C6;--cQ:#B5A8B9;--cR:#FF4200;--cS:#9A9A9A;--cT:#00FFD2;--cW:var(--ink);--cX:#38592E;--cY:#FFF62C;--cZ:#6A91E0;
   }
   @media (prefers-color-scheme: dark){
@@ -31,6 +37,7 @@
       --ink:#E7DFCE; --dim:#9A8F7B; --rule:#3A342A; --rule-2:#4C4436;
       --legendary:#B07BE8; --epic:#5FC4E6; --focus:#E0A44D;
       --mark:#4A3A16; --mark-edge:#8A6E24;
+      --accent:#E0A44D;
       --cA:#80FFD5;--cB:#39ABCF;--cC:#00FFFF;--cD:var(--ink);--cE:#C9A227;--cF:#FF69B5;--cG:#10EB5D;--cH:#C7BAA9;--cI:#B07BE8;--cK:#F1E78C;--cL:#92CC00;--cM:#D96B6B;--cO:#F3A44D;--cP:#BD94C6;--cQ:#B5A8B9;--cR:#FF4200;--cS:#9A9A9A;--cT:#00FFD2;--cW:#FFFFFF;--cX:#38592E;--cY:#FFF62C;--cZ:#6A91E0;
     }
   }
@@ -39,6 +46,7 @@
     --ink:#E7DFCE; --dim:#9A8F7B; --rule:#3A342A; --rule-2:#4C4436;
     --legendary:#B07BE8; --epic:#5FC4E6; --focus:#E0A44D;
     --mark:#4A3A16; --mark-edge:#8A6E24;
+    --accent:#E0A44D;
     --cA:#80FFD5;--cB:#39ABCF;--cC:#00FFFF;--cD:var(--ink);--cE:#C9A227;--cF:#FF69B5;--cG:#10EB5D;--cH:#C7BAA9;--cI:#B07BE8;--cK:#F1E78C;--cL:#92CC00;--cM:#D96B6B;--cO:#F3A44D;--cP:#BD94C6;--cQ:#B5A8B9;--cR:#FF4200;--cS:#9A9A9A;--cT:#00FFD2;--cW:#FFFFFF;--cX:#38592E;--cY:#FFF62C;--cZ:#6A91E0;
   }
 
