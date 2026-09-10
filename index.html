@@ -249,10 +249,12 @@
         <div class="fgroup">
           <label class="flabel" for="sort">Sort</label>
           <select class="sel" id="sort">
-            <option value="rarity">Rarity, then name</option>
+            <option value="level">Level</option>
             <option value="name">Name</option>
-            <option value="level">Level, highest first</option>
-            <option value="slot">Slot</option>
+          </select>
+          <select class="sel" id="sortdir">
+            <option value="desc">Descending</option>
+            <option value="asc">Ascending</option>
           </select>
         </div>
       </div>
@@ -689,7 +691,7 @@ function card(it){
 // `rows[0]` is the always-visible box; rows 1+ are the added AND/OR/NOT terms.
 // Row 0 has an op too, and it is never read -- the first row is the seed of the
 // left-to-right fold, not an operand of it.
-var state = { rows:[{ op:'AND', text:'' }], rarity:{}, slot:{}, set:{}, mastery:{}, have:{}, sort:'rarity' };
+var state = { rows:[{ op:'AND', text:'' }], rarity:{}, slot:{}, set:{}, mastery:{}, have:{}, sort:'level', dir:'desc' };
 
 function anyOn(o){ for (var k in o) if (o[k]) return true; return false; }
 
@@ -714,16 +716,25 @@ function visible(){
   });
 }
 
-var TIER_RANK = { Legendary:0, Epic:1 };
+/* FIELD AND DIRECTION ARE SEPARATE, so either field sorts either way. They were
+   one control with the direction baked into the option text ("Level, highest
+   first"), which meant level could only ever be read one way and every new
+   direction would have doubled the list.
+
+   ⚠️ NAME IS ALWAYS THE TIE-BREAK, AND ALWAYS ASCENDING. Level puts dozens of
+   items on the same number, and a tie broken by whatever order the export
+   happened to arrive in makes the list reshuffle for no visible reason between
+   builds. The tie-break does NOT follow the direction: reversing the sort is
+   meant to reverse the levels, not to scramble the names inside each one. */
+var SORT_KEYS = {
+  name: function(a, b){ return a.name.localeCompare(b.name); },
+  level: function(a, b){ return a.level - b.level; },
+};
 function sortRows(rows){
-  var s = state.sort;
+  var key = SORT_KEYS[state.sort] || SORT_KEYS.name;
+  var sign = state.dir === 'asc' ? 1 : -1;
   return rows.sort(function(a, b){
-    if (s === 'name') return a.name.localeCompare(b.name);
-    if (s === 'level') return b.level - a.level || a.name.localeCompare(b.name);
-    if (s === 'slot') return a.slot.localeCompare(b.slot) || a.name.localeCompare(b.name);
-    var ra = TIER_RANK[tierOf(a)] === undefined ? 9 : TIER_RANK[tierOf(a)];
-    var rb = TIER_RANK[tierOf(b)] === undefined ? 9 : TIER_RANK[tierOf(b)];
-    return ra - rb || a.name.localeCompare(b.name);
+    return sign * key(a, b) || a.name.localeCompare(b.name);
   });
 }
 
@@ -852,6 +863,7 @@ document.getElementById('fclear').addEventListener('click', function(){
   render();
 });
 document.getElementById('sort').addEventListener('change', function(e){ state.sort = e.target.value; render(); });
+document.getElementById('sortdir').addEventListener('change', function(e){ state.dir = e.target.value; render(); });
 
 /* `U (+C) Tier`: U is how many DISTINCT things you have, C how many more you
    could craft.
