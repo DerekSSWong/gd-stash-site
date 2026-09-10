@@ -58,6 +58,9 @@
   .totals{margin-left:auto; display:flex; gap:16px; font-family:"IBM Plex Mono",monospace;
           font-size:11px; letter-spacing:.04em}
   .totals b{font-weight:600; font-variant-numeric:tabular-nums}
+  /* The craftable half, quieter than the count it follows: it is an offer, not
+     a holding. */
+  .totals .craft-add{color:var(--accent); font-variant-numeric:tabular-nums}
 
   /* ---- shell ----
      The catalogue's shape: one full-width filter bar stacked ABOVE the results,
@@ -761,9 +764,12 @@ function chipRow(host, values, bucket){
   });
 }
 
-function tally(fn){
+function tally(fn, keep){
   var m = {};
-  ITEMS.forEach(function(it){ var k = fn(it); m[k] = (m[k] || 0) + 1; });
+  ITEMS.forEach(function(it){
+    if (keep && !keep(it)) return;
+    var k = fn(it); m[k] = (m[k] || 0) + 1;
+  });
   return Object.keys(m).sort(function(a, b){ return m[b] - m[a]; }).map(function(k){ return [k, m[k]]; });
 }
 
@@ -847,11 +853,34 @@ document.getElementById('fclear').addEventListener('click', function(){
 });
 document.getElementById('sort').addEventListener('change', function(e){ state.sort = e.target.value; render(); });
 
+/* `U (+C) Tier`: U is how many DISTINCT things you have, C how many more you
+   could craft.
+
+   ⚠️ U COUNTS CARDS, NOT ROWS, and that is the point of it. Three rolls of one
+   name are one card carrying an xN badge, so they count once here -- 147 Epic
+   cards stand for 162 physical rows in this stash. The row count is on <header>
+   for the gate; this line answers "how many different things", which is the
+   question the reader is asking.
+
+   Craftables are held apart rather than added in. They are blueprints you have
+   unlocked, not items you own, and a single total would say otherwise. */
 var t = document.getElementById('totals');
-tally(tierOf).forEach(function(v){
+var ownedTally = tally(tierOf, function(it){ return !it.craftable; });
+var craftByTier = {};
+ITEMS.forEach(function(it){ if (it.craftable) craftByTier[tierOf(it)] = (craftByTier[tierOf(it)] || 0) + 1; });
+// Every tier that has either kind, so a tier you can only craft still shows.
+Object.keys(craftByTier).forEach(function(k){
+  if (!ownedTally.some(function(v){ return v[0] === k; })) ownedTally.push([k, 0]);
+});
+ownedTally.sort(function(a, b){ return (b[1] + (craftByTier[b[0]] || 0)) - (a[1] + (craftByTier[a[0]] || 0)); });
+ownedTally.forEach(function(v){
   var s = el('span', null);
   s.appendChild(el('b', null, String(v[1])));
+  var c = craftByTier[v[0]] || 0;
+  if (c) s.appendChild(el('span', 'craft-add', ' (+' + c + ')'));
   s.appendChild(document.createTextNode(' ' + v[0]));
+  s.title = c ? v[1] + ' ' + v[0] + ' in your stash, ' + c + ' more you can craft'
+              : v[1] + ' ' + v[0] + ' in your stash';
   t.appendChild(s);
 });
 
